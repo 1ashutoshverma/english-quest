@@ -1,5 +1,31 @@
 # Book Library Management System
 
+### Important Links
+
+- [Frontend deployed Link](https://english-quest-frontend.vercel.app/)
+
+```bash
+https://english-quest-frontend.vercel.app/
+```
+
+- [Frontend deployed Repo Link](https://github.com/1ashutoshverma/english-quest-frontend) :
+
+```bash
+https://github.com/1ashutoshverma/english-quest-frontend
+```
+
+- [Backend deployed Link](https://cyan-rich-katydid.cyclic.app/) :
+
+```bash
+https://cyan-rich-katydid.cyclic.app/
+```
+
+- [Backend deployed Repo Link](https://github.com/1ashutoshverma/english-quest-backend) :
+
+```bash
+https://github.com/1ashutoshverma/english-quest-backend
+```
+
 ## Table of Contents
 
 - [Routes and Methods](#routes-and-methods)
