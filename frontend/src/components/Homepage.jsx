@@ -14,8 +14,9 @@ import {
     Button,
     useDisclosure,
     Text,
+    CloseButton,
 } from '@chakra-ui/react'
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
     Modal,
     ModalOverlay,
@@ -34,15 +35,16 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
-    AlertDialogCloseButton,
 } from '@chakra-ui/react'
+import { Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
+
 
 const Homepage = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: delIsOpen, onOpen: delOnOpen, onClose: delOnClose } = useDisclosure();
     const [data, setData] = useState([]);
     const [editData, setEditData] = useState({});
-    const { user, refresh, setRefresh } = useContext(AuthContext);
+    const { user, refresh, setRefresh, selectedRole } = useContext(AuthContext);
     const [formData, setFormData] = useState(editData);
     const [filter, setFilter] = useState("");
     const [sort, setSort] = useState("");
@@ -51,10 +53,8 @@ const Homepage = () => {
     const [totalPage, setTotalPage] = useState("")
     const [deleteId, setDeleteId] = useState("")
     const [limit, setLimit] = useState(10)
-
     const cancelRef = React.useRef()
-
-
+    const [error, setError] = useState(null);
 
     const getData = async (url) => {
         try {
@@ -64,11 +64,13 @@ const Homepage = () => {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(res.data)
+            // console.log(res.data)
+            setError(null)
             setTotalPage(res.data.totalPages)
             setData(res.data.data);
         } catch (error) {
-            console.log(error);
+            setError(error.response?.data.message)
+            // console.log(error);
         }
     };
 
@@ -84,8 +86,10 @@ const Homepage = () => {
                 setRefresh(!refresh);
                 onClose();
             }
+            setError(null)
         } catch (error) {
-            console.log(error);
+            setError(error.response?.data.message)
+            // console.log(error);
         }
     };
 
@@ -101,8 +105,10 @@ const Homepage = () => {
                 setRefresh(!refresh);
                 onClose();
             }
+            setError(null)
         } catch (error) {
-            console.log(error);
+            setError(error.response?.data.message)
+            // console.log(error);
         }
     };
 
@@ -131,6 +137,7 @@ const Homepage = () => {
         let query = {};
         query.page = page;
         query.limit = limit;
+        query.role = user.selectedRole
 
         if (filter) {
             query.genre = filter;
@@ -146,14 +153,22 @@ const Homepage = () => {
         let Query = new URLSearchParams(query).toString();
 
         let newUrl = serverUrl + "/books" + (Query ? "?" + Query : "");
-        // console.log(newUrl);
         getData(newUrl);
-    }, [refresh, filter, sort, time, page, limit]);
+    }, [refresh, filter, sort, time, page, limit, user.selectedRole]);
 
 
 
     return (
         <Box m={"10px"}>
+            {error && (
+                <Alert status="error" variant="solid" mb={4}>
+                    <AlertIcon />
+                    <AlertTitle mr={2}>Error!</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                    <CloseButton onClick={() => setError(null)} position="absolute" right="8px" top="8px" />
+                </Alert>
+            )}
+
             <Flex gap={"20px"} maxW={"1280px"} margin={"auto"} mt={"15px"}
                 mb={"15px"}>
                 <Select value={filter} onChange={(e) => { setFilter(e.target.value); setPage(1) }}>
@@ -165,8 +180,8 @@ const Homepage = () => {
                 </Select>
                 <Select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1) }}>
                     <option value="">Sort by Time</option>
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
+                    <option value="desc">Ascending</option>
+                    <option value="asc">Descending</option>
                 </Select>
                 <Select value={time} onChange={(e) => { setTime(e.target.value); setPage(1) }}>
                     <option value="">Books time</option>
@@ -184,7 +199,7 @@ const Homepage = () => {
                             <Th>Genre</Th>
                             <Th>Created At</Th>
                             {
-                                user.role && user.role.includes("CREATER") ? <><Th>Edit</Th>
+                                user.role && user.selectedRole === "CREATER" ? <><Th>Edit</Th>
                                     <Th>Delete</Th></> : <></>
                             }
 
@@ -221,7 +236,7 @@ const Homepage = () => {
                                     <Td>{ele.genre}</Td>
                                     <Td>{time}</Td>
                                     {
-                                        user.role && user.role.includes("CREATER") ? <>
+                                        user.role && user.selectedRole === "CREATER" ? <>
                                             <Td>
                                                 <Button onClick={() => { setEditData(ele); onOpen(); }} colorScheme='green'>Edit</Button>
                                             </Td>
